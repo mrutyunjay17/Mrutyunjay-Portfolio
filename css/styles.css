@@ -1,14 +1,14 @@
 :root {
-  --primary-bg: #1f2a35;
-  --secondary-bg: #243240;
-  --surface-bg: #2b3a4a;
+  --primary-bg: #0a0a0c;
+  --secondary-bg: #121214;
+  --surface-bg: #161618;
 
-  --accent: #d6c2a1;
-  --accent-soft: rgba(214, 194, 161, 0.25);
+  --accent: #e7d4a8;
+  --accent-soft: rgba(231, 212, 168, 0.25);
 
-  --text-primary: #f2f2f2;
-  --text-muted: #9faab5;
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  --text-primary: #f3f4f6;
+  --text-muted: #a1a1aa;
+  --border-subtle: rgba(255, 255, 255, 0.05);
 
   --font-heading: "Playfair Display", "Cinzel", "Times New Roman", serif;
   --font-body: "Inter", "Manrope", "Segoe UI", sans-serif;
@@ -48,9 +48,8 @@ body {
   font-weight: 400;
   line-height: 1.7;
   color: var(--text-primary);
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.02), transparent 60%),
-    linear-gradient(180deg, #1f2a35 0%, #1b2530 100%);
+  background: linear-gradient(180deg, #0a0a0c 0%, #121214 100%);
+  background-attachment: fixed;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -92,7 +91,7 @@ a {
   z-index: 1200;
   padding: var(--space-1) var(--space-2);
   background: var(--accent);
-  color: #1f2a35;
+  color: #0c0c0e;
 }
 
 .skip-link:focus {
@@ -116,9 +115,7 @@ a {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.02), transparent 60%),
-    linear-gradient(180deg, #1f2a35 0%, #1b2530 100%);
+  background: linear-gradient(180deg, #0a0a0c 0%, #121214 100%);
 }
 
 #scroll-wrapper {
@@ -137,8 +134,8 @@ a {
 }
 
 .site-header.is-scrolled {
-  background: rgba(31, 42, 53, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(10, 10, 12, 0.85);
+  backdrop-filter: blur(10px);
   border-bottom-color: var(--border-subtle);
 }
 
@@ -234,7 +231,7 @@ a {
 .resume-btn:hover,
 .resume-btn:focus-visible {
   background: var(--accent);
-  color: #1f2a35;
+  color: #0c0c0e;
 }
 
 .nav-toggle {
@@ -276,6 +273,7 @@ a {
   transition:
     opacity 400ms cubic-bezier(0.215, 0.61, 0.355, 1),
     transform 400ms cubic-bezier(0.215, 0.61, 0.355, 1);
+  border-top: 1px solid var(--border-subtle);
   pointer-events: none;
 }
 
@@ -283,7 +281,7 @@ a {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(36, 50, 64, 0.16) 0%, rgba(31, 42, 53, 0.24) 100%);
+  background: transparent;
   opacity: 0;
   transition: opacity var(--stage-transition) ease;
   z-index: 0;
@@ -320,7 +318,7 @@ a {
   position: relative;
   display: inline-block;
   margin: 0 0 20px;
-  color: #d6c2a1;
+  color: var(--accent);
   font-size: 1rem;
   font-weight: 500;
   letter-spacing: 3px;
@@ -333,7 +331,7 @@ a {
   width: 60px;
   height: 1px;
   margin-top: 12px;
-  background-color: rgba(214, 194, 161, 0.6);
+  background-color: rgba(231, 212, 168, 0.6);
 }
 
 #hero-title {
@@ -366,15 +364,17 @@ a {
 }
 
 .cta-primary {
-  background: var(--accent);
-  color: #1f2a35;
+  background: transparent;
+  color: var(--accent);
   border: 1px solid var(--accent);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .cta-primary:hover,
 .cta-primary:focus-visible {
-  background: #cfbb98;
-  border-color: #cfbb98;
+  background: var(--accent);
+  color: #0c0c0e;
+  border-color: var(--accent);
 }
 
 .cta-secondary {
@@ -386,7 +386,7 @@ a {
 .cta-secondary:hover,
 .cta-secondary:focus-visible {
   background: var(--accent);
-  color: #1f2a35;
+  color: #0c0c0e;
 }
 
 .scroll-indicator {
@@ -412,7 +412,7 @@ a {
 .scroll-mouse {
   width: 22px;
   height: 36px;
-  border: 1.5px solid rgba(214, 194, 161, 0.6);
+  border: 1.5px solid rgba(231, 212, 168, 0.6);
   border-radius: 12px;
   display: inline-flex;
   justify-content: center;
@@ -423,7 +423,7 @@ a {
   width: 4px;
   height: 6px;
   border-radius: 2px;
-  background: #d6c2a1;
+  background: var(--accent);
   animation: wheel-scroll 1.2s ease-in-out infinite;
 }
 
@@ -486,8 +486,8 @@ a {
     align-items: flex-start;
     gap: var(--space-2);
     padding: var(--space-3) var(--container-padding);
-    background: rgba(31, 42, 53, 0.95);
-    backdrop-filter: blur(8px);
+    background: rgba(10, 10, 12, 0.95);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-subtle);
   }
 

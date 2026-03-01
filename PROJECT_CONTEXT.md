@@ -3,17 +3,18 @@
 Last updated: 2026-03-01
 
 ## Goal (Current)
-Build a software-engineer portfolio with an immersive full-screen scroll experience and section-based storytelling, using a clean minimal background as a base for future per-section visual layering.
+Build a software-engineer portfolio with an immersive full-screen scroll experience and section-based storytelling, using a clean ultra-dark neutral background as a premium base for future 3D overlays.
 
 ## Current State Summary
 - The page currently uses a **minimal executive visual style** (no visible 3D objects).
 - Immersive architecture is preserved: fixed viewport, long scroll surrogate, progress mapping, stage activation, and active nav syncing.
 - `immersiveScene.js` is now a lightweight progress/camera-state module (no Three.js rendering).
 - Stage enter/exit transitions are now more deliberate with separate active/leaving states.
+- Theme has been updated to a **neutral Obsidian black system** (no blue/purple tint, no decorative overlays).
 
 ## Repository Snapshot
 - `index.html`: Single-page structure with fixed app container, header/nav, 7 full-screen stages (`hero` to `contact`), CTA links, and `js/main.js` entrypoint.
-- `css/styles.css`: Typography/theme, responsive nav, stage transitions, hero styling, hidden native scrollbar, and minimal background treatment.
+- `css/styles.css`: Typography/theme, responsive nav, stage transitions, hero styling, hidden native scrollbar, and neutral Obsidian background system.
 - `js/main.js`: Scroll-to-progress mapping, stage/nav activation, smooth anchor navigation, dynamic scene module import, resize handling, and teardown.
 - `js/immersiveScene.js`: Minimal immersive engine with lerped progress and neutral camera-like state only; no geometry/material/lights/fog/rendering.
 - `js/heroScene.js`: Legacy/experimental Three.js hero scene module still present but not used.
@@ -31,10 +32,17 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
 
 ## Visual / UX Direction (Current)
 - Base background:
-  - `linear-gradient(180deg, #1F2A35 0%, #1B2530 100%)`
-  - plus subtle vignette `radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 60%)`
-- No patterns, no 3D shapes, no glow/bloom.
-- Tone: minimal, professional, architectural.
+  - `linear-gradient(180deg, #0A0A0C 0%, #121214 100%)`
+  - fixed attachment for depth continuity with immersive scroll.
+- Section treatment:
+  - all stages transparent by default
+  - subtle separator `border-top: 1px solid rgba(255,255,255,0.05)`.
+- Header on scroll:
+  - `background: rgba(10, 10, 12, 0.85)`
+  - `backdrop-filter: blur(10px)`
+  - `border-bottom: 1px solid var(--border-subtle)`.
+- No radial highlights, no patterns, no texture noise, no glow/bloom.
+- Tone: ultra-dark, minimal, premium, architect-grade.
 
 ## Transition System
 - Enter (`.stage` -> `.is-active`):
@@ -50,6 +58,7 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
 - Previous 3D world rendering path has been removed.
 - No Three.js render loop/geometry draw overhead in current background implementation.
 - RAF is retained only for smooth progress interpolation in the minimal immersive module.
+- Recent updates are CSS-only theme refinements; scrolling/runtime logic remains unchanged.
 
 ## Known Gaps / Risks
 - `README.md` remains undocumented (setup/architecture missing).
@@ -58,7 +67,7 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
 - `window.PortfolioApp.features.threeReady` is still `false` and could be renamed for clarity now that scene is non-Three.js.
 
 ## Practical Next Steps
-- Decide the next background strategy per stage (subtle gradients, abstract motion layers, or section-specific visual tokens).
+- Add future 3D overlays only when ready, keeping this neutral background as the visual foundation.
 - Document architecture and run instructions in `README.md`.
 - Replace placeholder resume PDF.
 - Either remove `js/heroScene.js` or explicitly mark it as archived/experimental.
