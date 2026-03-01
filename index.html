@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Senior Software Engineer and Distributed Systems Architect portfolio website."
+    />
+    <title>Senior Software Engineer | Distributed Systems Architect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <div id="app-container">
+      <div id="scene-root" aria-hidden="true"></div>
+
+      <header class="site-header" id="top">
+        <div class="container header-inner">
+          <a href="#hero" class="logo" aria-label="Home">Mrutyunjay Bahirat</a>
+
+          <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation" />
+          <label for="nav-toggle" class="nav-toggle-label" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </label>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul>
+              <li><a href="#about">About</a></li>
+              <li><a href="#tech-stack">Tech Stack</a></li>
+              <li><a href="#experience">Experience</a></li>
+              <li><a href="#architecture-philosophy">Philosophy</a></li>
+              <li><a href="#projects">Projects</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+            <a class="resume-btn" href="assets/resume.pdf" target="_blank" rel="noopener noreferrer"
+              >Resume</a
+            >
+          </nav>
+        </div>
+      </header>
+
+      <main id="main-content" class="stages" aria-live="polite">
+        <section id="hero" class="stage is-active" data-stage="0" aria-labelledby="hero-title">
+          <div class="container stage-inner hero-content">
+            <p class="hero-signature">MRUTYUNJAY BAHIRAT</p>
+            <h1 id="hero-title">Engineering Scalable Distributed Systems</h1>
+            <p class="hero-subtitle">
+              Senior Software Engineer | Distributed Systems Architect | Banking Domain
+            </p>
+            <div class="hero-cta">
+              <a href="#architecture-philosophy" class="cta-btn cta-primary">View Architecture</a>
+              <a href="assets/resume.pdf" class="cta-btn cta-secondary" target="_blank" rel="noopener noreferrer"
+                >Download Resume</a
+              >
+            </div>
+            <div class="scroll-indicator" id="hero-indicator" aria-hidden="true">
+              <span class="scroll-indicator-text">Scroll down to explore</span>
+              <span class="scroll-mouse" aria-hidden="true">
+                <span class="scroll-wheel"></span>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" class="stage" data-stage="1" aria-labelledby="about-title">
+          <div class="container stage-inner">
+            <h2 id="about-title">About</h2>
+            <p>
+              Designing fault-tolerant, compliant systems by balancing reliability engineering, cost, and delivery
+              velocity.
+            </p>
+          </div>
+        </section>
+
+        <section id="tech-stack" class="stage" data-stage="2" aria-labelledby="tech-stack-title">
+          <div class="container stage-inner">
+            <h2 id="tech-stack-title">Tech Stack</h2>
+            <p>
+              Distributed compute, event streaming, resilient APIs, observability-first platforms, and data-intensive
+              systems.
+            </p>
+          </div>
+        </section>
+
+        <section id="experience" class="stage" data-stage="3" aria-labelledby="experience-title">
+          <div class="container stage-inner">
+            <h2 id="experience-title">Experience</h2>
+            <p>
+              Building production-grade architectures with predictable latency, durable workflows, and operational
+              clarity.
+            </p>
+          </div>
+        </section>
+
+        <section
+          id="architecture-philosophy"
+          class="stage"
+          data-stage="4"
+          aria-labelledby="architecture-philosophy-title"
+        >
+          <div class="container stage-inner">
+            <h2 id="architecture-philosophy-title">Architecture Philosophy</h2>
+            <p>
+              Explicit boundaries, stable interfaces, measurable SLAs, and systems that degrade gracefully under
+              stress.
+            </p>
+          </div>
+        </section>
+
+        <section id="projects" class="stage" data-stage="5" aria-labelledby="projects-title">
+          <div class="container stage-inner">
+            <h2 id="projects-title">Projects</h2>
+            <p>
+              End-to-end platforms spanning event pipelines, high-throughput services, and reliability automation.
+            </p>
+          </div>
+        </section>
+
+        <section id="contact" class="stage" data-stage="6" aria-labelledby="contact-title">
+          <div class="container stage-inner">
+            <h2 id="contact-title">Contact</h2>
+            <p>For architecture reviews, modernization strategy, and high-stakes distributed systems initiatives.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="scroll-wrapper" aria-hidden="true"></div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
