@@ -16,8 +16,12 @@ const stageElements = Array.from(document.querySelectorAll(".stage"));
 const navLinks = Array.from(document.querySelectorAll('.site-nav a[href^="#"]'));
 const heroIndicator = document.getElementById("hero-indicator");
 const heroBrowserFrame = document.getElementById("hero-browser-frame");
+const heroStage = document.getElementById("hero");
 
 const isMobile = () => window.innerWidth < 768;
+const TRANSITION_THRESHOLD = 0.7;
+const CURRENT_SCALE_MAX = 1.6;
+const NEXT_SCALE_MIN = 0.96;
 
 let scrollRange = 1;
 let currentProgress = 0;
@@ -26,7 +30,6 @@ let currentStageIndex = 0;
 let immersiveScene = null;
 let immersiveModule = null;
 let ticking = false;
-const stageLeaveTimers = new Map();
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -38,7 +41,13 @@ const getProgressFromScroll = () => clamp(window.scrollY / scrollRange, 0, 1);
 
 const getStageIndexFromProgress = (progress) => {
   const count = STAGE_IDS.length - 1;
-  return clamp(Math.round(progress * count), 0, count);
+  if (progress <= 0) return 0;
+  if (progress >= 1) return count;
+
+  const scaled = progress * count;
+  const from = clamp(Math.floor(scaled), 0, count - 1);
+  const t = scaled - from;
+  return t >= TRANSITION_THRESHOLD ? from + 1 : from;
 };
 
 const stageIndexToScrollTop = (index) => {
@@ -60,36 +69,10 @@ const setActiveNav = (stageId) => {
 };
 
 const setActiveStage = (index) => {
-  const previousIndex = currentStageIndex;
-
-  if (previousIndex !== index) {
-    const previousStage = stageElements[previousIndex];
-    if (previousStage) {
-      previousStage.classList.remove("is-active");
-      previousStage.classList.add("is-leaving");
-
-      const existingTimer = stageLeaveTimers.get(previousStage);
-      if (existingTimer) {
-        window.clearTimeout(existingTimer);
-      }
-
-      const timerId = window.setTimeout(() => {
-        previousStage.classList.remove("is-leaving");
-        stageLeaveTimers.delete(previousStage);
-      }, 320);
-      stageLeaveTimers.set(previousStage, timerId);
-    }
-  }
-
   stageElements.forEach((stage, idx) => {
-    if (idx === index) {
-      stage.classList.remove("is-leaving");
-      stage.classList.add("is-active");
-    } else if (idx !== previousIndex) {
-      stage.classList.remove("is-active");
-    }
+    stage.classList.toggle("is-active", idx === index);
+    stage.classList.remove("is-leaving");
   });
-
   currentStageIndex = index;
   setActiveNav(STAGE_IDS[index]);
 };
@@ -99,20 +82,53 @@ const updateIndicator = (progress) => {
   heroIndicator.classList.toggle("is-hidden", progress > 0.05);
 };
 
-const updateHeroBrowserFrame = (progress) => {
-  if (!heroBrowserFrame) return;
+const applySectionFlow = (progress) => {
+  const segmentCount = STAGE_IDS.length - 1;
+  const opacities = new Array(STAGE_IDS.length).fill(0);
+  const scales = new Array(STAGE_IDS.length).fill(1);
 
-  const stageCount = STAGE_IDS.length - 1;
-  const transitionThreshold = stageCount > 0 ? 1 / (stageCount * 2) : 1;
-  const localProgress = clamp(progress / transitionThreshold, 0, 1);
+  if (progress <= 0) {
+    opacities[0] = 1;
+  } else if (progress >= 1) {
+    opacities[segmentCount] = 1;
+  } else {
+    const scaled = progress * segmentCount;
+    const from = clamp(Math.floor(scaled), 0, segmentCount - 1);
+    const to = from + 1;
+    const t = clamp(scaled - from, 0, 1);
 
-  const easedProgress = 1 - (1 - localProgress) ** 2;
-  const scale = 1 + easedProgress * 0.95;
-  const fadeStart = 0.72;
-  const opacity = 1 - clamp((localProgress - fadeStart) / (1 - fadeStart), 0, 1);
+    opacities[from] = 1 - t;
+    scales[from] = 1 + t * (CURRENT_SCALE_MAX - 1);
 
-  heroBrowserFrame.style.setProperty("--hero-browser-scale", scale.toFixed(4));
-  heroBrowserFrame.style.setProperty("--hero-browser-opacity", opacity.toFixed(4));
+    if (t >= TRANSITION_THRESHOLD) {
+      const nextT = (t - TRANSITION_THRESHOLD) / (1 - TRANSITION_THRESHOLD);
+      opacities[to] = nextT;
+      scales[to] = NEXT_SCALE_MIN + nextT * (1 - NEXT_SCALE_MIN);
+    } else {
+      opacities[to] = 0;
+      scales[to] = NEXT_SCALE_MIN;
+    }
+  }
+
+  stageElements.forEach((stage, idx) => {
+    const opacity = clamp(opacities[idx], 0, 1);
+    const scale = scales[idx];
+    stage.style.opacity = opacity.toFixed(4);
+    stage.style.transform = `translate3d(0, 0, 0) scale(${scale.toFixed(4)})`;
+    stage.style.zIndex = `${100 + idx}`;
+    stage.style.pointerEvents = opacity > 0.65 ? "auto" : "none";
+  });
+
+  if (heroStage && heroBrowserFrame) {
+    const heroOpacity = opacities[0];
+    const heroScale = scales[0];
+    heroStage.style.setProperty("--hero-browser-scale", heroScale.toFixed(4));
+    heroStage.style.setProperty("--hero-browser-opacity", heroOpacity.toFixed(4));
+    heroStage.style.setProperty("--hero-content-opacity", heroOpacity.toFixed(4));
+    heroStage.style.setProperty("--hero-content-shift", `${(-20 * (1 - heroOpacity)).toFixed(2)}px`);
+  }
+
+  return { opacities, scales };
 };
 
 const applyProgress = (progress) => {
@@ -127,14 +143,17 @@ const applyProgress = (progress) => {
   }
 
   updateIndicator(progress);
-  updateHeroBrowserFrame(progress);
+  const sectionFlow = applySectionFlow(progress);
 
   if (header) {
     header.classList.toggle("is-scrolled", progress > 0.02);
   }
 
   if (immersiveScene) {
-    immersiveScene.updateProgress(progress);
+    immersiveScene.updateProgress(progress, {
+      section2Opacity: sectionFlow.opacities[1],
+      section2Scale: sectionFlow.scales[1],
+    });
   }
 };
 
@@ -207,11 +226,6 @@ const onResize = () => {
 };
 
 const teardown = () => {
-  stageLeaveTimers.forEach((timerId) => {
-    window.clearTimeout(timerId);
-  });
-  stageLeaveTimers.clear();
-
   if (immersiveScene && typeof immersiveScene.dispose === "function") {
     immersiveScene.dispose();
   }
@@ -221,7 +235,7 @@ const teardown = () => {
 window.PortfolioApp = {
   version: "immersive-scroll-portfolio",
   features: {
-    threeReady: false,
+    threeReady: true,
   },
   mounts: {
     appContainer,
