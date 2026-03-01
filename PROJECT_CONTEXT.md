@@ -11,11 +11,13 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
 - `immersiveScene.js` is now a lightweight progress/camera-state module (no Three.js rendering).
 - Stage enter/exit transitions are now more deliberate with separate active/leaving states.
 - Theme has been updated to a **neutral Obsidian black system** (no blue/purple tint, no decorative overlays).
+- Hero now includes a **macOS-style browser UI shell** overlay (opaque top bar + transparent content area) wrapped around existing hero content.
+- Hero browser shell performs a **scroll-tied clean zoom + fade-out** during the first stage transition (no rotation/tilt/wobble).
 
 ## Repository Snapshot
-- `index.html`: Single-page structure with fixed app container, header/nav, 7 full-screen stages (`hero` to `contact`), CTA links, and `js/main.js` entrypoint.
-- `css/styles.css`: Typography/theme, responsive nav, stage transitions, hero styling, hidden native scrollbar, and neutral Obsidian background system.
-- `js/main.js`: Scroll-to-progress mapping, stage/nav activation, smooth anchor navigation, dynamic scene module import, resize handling, and teardown.
+- `index.html`: Single-page structure with fixed app container, header/nav, 7 full-screen stages (`hero` to `contact`), hero wrapped in a browser-frame shell, CTA links, and `js/main.js` entrypoint.
+- `css/styles.css`: Typography/theme, responsive nav, stage transitions, hero styling, browser-shell styling, hidden native scrollbar, and neutral Obsidian background system.
+- `js/main.js`: Scroll-to-progress mapping, stage/nav activation, smooth anchor navigation, dynamic scene module import, hero browser-frame zoom/fade updates, resize handling, and teardown.
 - `js/immersiveScene.js`: Minimal immersive engine with lerped progress and neutral camera-like state only; no geometry/material/lights/fog/rendering.
 - `js/heroScene.js`: Legacy/experimental Three.js hero scene module still present but not used.
 - `README.md`: Placeholder (`Sample text`).
@@ -28,7 +30,8 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
 4. Progress snaps to 7 stage indices and updates active section/nav state.
 5. Stage enter/exit classes (`is-active`, `is-leaving`) drive transition animation.
 6. Progress is passed to `immersiveScene.updateProgress()` for smooth internal interpolation (future background hooks).
-7. Header and hero indicator update based on progress thresholds.
+7. Hero browser-frame scale/opacity is updated from normalized progress during the first-stage transition window.
+8. Header and hero indicator update based on progress thresholds.
 
 ## Visual / UX Direction (Current)
 - Base background:
@@ -41,6 +44,10 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
   - `background: rgba(10, 10, 12, 0.85)`
   - `backdrop-filter: blur(10px)`
   - `border-bottom: 1px solid var(--border-subtle)`.
+- Hero browser shell:
+  - frame is transparent with subtle border/shadow
+  - topbar is opaque (`#161618`) with macOS traffic lights and minimal nav/search UI
+  - content area is transparent so hero retains the exact page background.
 - No radial highlights, no patterns, no texture noise, no glow/bloom.
 - Tone: ultra-dark, minimal, premium, architect-grade.
 
@@ -59,6 +66,7 @@ Build a software-engineer portfolio with an immersive full-screen scroll experie
 - No Three.js render loop/geometry draw overhead in current background implementation.
 - RAF is retained only for smooth progress interpolation in the minimal immersive module.
 - Recent updates are CSS-only theme refinements; scrolling/runtime logic remains unchanged.
+- Hero browser transition uses GPU-friendly CSS transforms/opacity driven by existing scroll progress updates.
 
 ## Known Gaps / Risks
 - `README.md` remains undocumented (setup/architecture missing).

@@ -15,6 +15,7 @@ const header = document.querySelector(".site-header");
 const stageElements = Array.from(document.querySelectorAll(".stage"));
 const navLinks = Array.from(document.querySelectorAll('.site-nav a[href^="#"]'));
 const heroIndicator = document.getElementById("hero-indicator");
+const heroBrowserFrame = document.getElementById("hero-browser-frame");
 
 const isMobile = () => window.innerWidth < 768;
 
@@ -98,6 +99,22 @@ const updateIndicator = (progress) => {
   heroIndicator.classList.toggle("is-hidden", progress > 0.05);
 };
 
+const updateHeroBrowserFrame = (progress) => {
+  if (!heroBrowserFrame) return;
+
+  const stageCount = STAGE_IDS.length - 1;
+  const transitionThreshold = stageCount > 0 ? 1 / (stageCount * 2) : 1;
+  const localProgress = clamp(progress / transitionThreshold, 0, 1);
+
+  const easedProgress = 1 - (1 - localProgress) ** 2;
+  const scale = 1 + easedProgress * 0.95;
+  const fadeStart = 0.72;
+  const opacity = 1 - clamp((localProgress - fadeStart) / (1 - fadeStart), 0, 1);
+
+  heroBrowserFrame.style.setProperty("--hero-browser-scale", scale.toFixed(4));
+  heroBrowserFrame.style.setProperty("--hero-browser-opacity", opacity.toFixed(4));
+};
+
 const applyProgress = (progress) => {
   if (Math.abs(progress - lastAppliedProgress) < 0.0005) return;
 
@@ -110,6 +127,7 @@ const applyProgress = (progress) => {
   }
 
   updateIndicator(progress);
+  updateHeroBrowserFrame(progress);
 
   if (header) {
     header.classList.toggle("is-scrolled", progress > 0.02);

@@ -51,23 +51,45 @@
 
       <main id="main-content" class="stages" aria-live="polite">
         <section id="hero" class="stage is-active" data-stage="0" aria-labelledby="hero-title">
-          <div class="container stage-inner hero-content">
-            <p class="hero-signature">MRUTYUNJAY BAHIRAT</p>
-            <h1 id="hero-title">Engineering Scalable Distributed Systems</h1>
-            <p class="hero-subtitle">
-              Senior Software Engineer | Distributed Systems Architect | Banking Domain
-            </p>
-            <div class="hero-cta">
-              <a href="#architecture-philosophy" class="cta-btn cta-primary">View Architecture</a>
-              <a href="assets/resume.pdf" class="cta-btn cta-secondary" target="_blank" rel="noopener noreferrer"
-                >Download Resume</a
-              >
+          <div class="browser-frame" id="hero-browser-frame">
+            <div class="browser-topbar" aria-hidden="true">
+              <div class="browser-topbar-left">
+                <span class="browser-dot browser-dot-red"></span>
+                <span class="browser-dot browser-dot-yellow"></span>
+                <span class="browser-dot browser-dot-green"></span>
+                <button class="browser-nav-btn" type="button" tabindex="-1" aria-label="Back">
+                  <svg viewBox="0 0 16 16" role="img" aria-hidden="true">
+                    <path d="M10.5 3.5L6 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" />
+                  </svg>
+                </button>
+                <button class="browser-nav-btn" type="button" tabindex="-1" aria-label="Forward">
+                  <svg viewBox="0 0 16 16" role="img" aria-hidden="true">
+                    <path d="M5.5 3.5L10 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" />
+                  </svg>
+                </button>
+              </div>
+              <div class="browser-searchbar"></div>
             </div>
-            <div class="scroll-indicator" id="hero-indicator" aria-hidden="true">
-              <span class="scroll-indicator-text">Scroll down to explore</span>
-              <span class="scroll-mouse" aria-hidden="true">
-                <span class="scroll-wheel"></span>
-              </span>
+            <div class="browser-content">
+              <div class="container stage-inner hero-content">
+                <p class="hero-signature">MRUTYUNJAY BAHIRAT</p>
+                <h1 id="hero-title">Engineering Scalable Distributed Systems</h1>
+                <p class="hero-subtitle">
+                  Senior Software Engineer | Distributed Systems Architect | Banking Domain
+                </p>
+                <div class="hero-cta">
+                  <a href="#architecture-philosophy" class="cta-btn cta-primary">View Architecture</a>
+                  <a href="assets/resume.pdf" class="cta-btn cta-secondary" target="_blank" rel="noopener noreferrer"
+                    >Download Resume</a
+                  >
+                </div>
+                <div class="scroll-indicator" id="hero-indicator" aria-hidden="true">
+                  <span class="scroll-indicator-text">Scroll down to explore</span>
+                  <span class="scroll-mouse" aria-hidden="true">
+                    <span class="scroll-wheel"></span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
