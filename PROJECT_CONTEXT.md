@@ -2,46 +2,63 @@
 
 Last updated: 2026-03-01
 
-## Goal
-Create a personal software-engineer portfolio website with a 3D immersive scrolling experience and staged content sections.
+## Goal (Current)
+Build a software-engineer portfolio with an immersive full-screen scroll experience and section-based storytelling, using a clean minimal background as a base for future per-section visual layering.
+
+## Current State Summary
+- The page currently uses a **minimal executive visual style** (no visible 3D objects).
+- Immersive architecture is preserved: fixed viewport, long scroll surrogate, progress mapping, stage activation, and active nav syncing.
+- `immersiveScene.js` is now a lightweight progress/camera-state module (no Three.js rendering).
+- Stage enter/exit transitions are now more deliberate with separate active/leaving states.
 
 ## Repository Snapshot
 - `index.html`: Single-page structure with fixed app container, header/nav, 7 full-screen stages (`hero` to `contact`), CTA links, and `js/main.js` entrypoint.
-- `css/styles.css`: Full visual system and responsive behavior (desktop + mobile nav), stage transition styling, hero animations, hidden native scrollbar, and long scroll surrogate via `#scroll-wrapper`.
-- `js/main.js`: Core app controller for scroll-to-progress mapping, active stage switching, nav synchronization, smooth anchor navigation, lazy import/boot of immersive scene, resize handling, and scene teardown.
-- `js/immersiveScene.js`: Three.js immersive environment driven by scroll progress; includes grid layers, instanced pillars, stream guide lines/pulses, framed geometry, pointer-based parallax, camera keyframe interpolation, and cleanup.
-- `js/heroScene.js`: Separate Three.js hero-only network scene module (nodes, edges, pulses, pointer parallax). Present in repo but not imported by current app flow.
-- `README.md`: Currently contains only `Sample text` (placeholder).
-- `assets/resume.pdf`: Empty file (`0` bytes) acting as a placeholder target for Resume links.
+- `css/styles.css`: Typography/theme, responsive nav, stage transitions, hero styling, hidden native scrollbar, and minimal background treatment.
+- `js/main.js`: Scroll-to-progress mapping, stage/nav activation, smooth anchor navigation, dynamic scene module import, resize handling, and teardown.
+- `js/immersiveScene.js`: Minimal immersive engine with lerped progress and neutral camera-like state only; no geometry/material/lights/fog/rendering.
+- `js/heroScene.js`: Legacy/experimental Three.js hero scene module still present but not used.
+- `README.md`: Placeholder (`Sample text`).
+- `assets/resume.pdf`: Empty file (`0` bytes).
 
 ## Runtime Flow
-1. Page renders fixed viewport app (`#app-container`) and a tall `#scroll-wrapper` (`700vh`) to capture native scroll.
-2. `main.js` maps `window.scrollY` to normalized progress `[0,1]`.
-3. Progress is quantized to 7 stages (`hero`, `about`, `tech-stack`, `experience`, `architecture-philosophy`, `projects`, `contact`).
-4. Active stage class and nav `is-active` state are updated.
-5. Progress is passed to immersive Three.js scene (`updateProgress`) to move camera through keyframed zones.
-6. Header style changes after slight scroll; hero scroll-indicator hides after early progress.
+1. `#app-container` stays fixed to viewport.
+2. `#scroll-wrapper` (`700vh`) provides native scrolling distance.
+3. `main.js` maps `window.scrollY` to normalized progress `[0,1]`.
+4. Progress snaps to 7 stage indices and updates active section/nav state.
+5. Stage enter/exit classes (`is-active`, `is-leaving`) drive transition animation.
+6. Progress is passed to `immersiveScene.updateProgress()` for smooth internal interpolation (future background hooks).
+7. Header and hero indicator update based on progress thresholds.
 
-## Visual / UX Direction
-- Theme: dark blue-steel background with warm sand accent (`#d6c2a1`).
-- Typography: Playfair Display for headings, Inter for body.
-- Experience style: cinematic, architecture-focused, motion-led storytelling through stage transitions + 3D depth.
+## Visual / UX Direction (Current)
+- Base background:
+  - `linear-gradient(180deg, #1F2A35 0%, #1B2530 100%)`
+  - plus subtle vignette `radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 60%)`
+- No patterns, no 3D shapes, no glow/bloom.
+- Tone: minimal, professional, architectural.
 
-## Current Implementation Notes
-- Scene import is runtime dynamic (`import('./immersiveScene.js')`), improving initial script cost.
-- Scroll logic uses `requestAnimationFrame` throttling and small epsilon guard to avoid redundant updates.
-- Mobile behavior lowers rendering load (reduced antialiasing/pixel ratio and fewer scene instances).
-- Accessibility elements present: skip-link, semantic landmarks, aria labels/current state, reduced-motion media query support.
+## Transition System
+- Enter (`.stage` -> `.is-active`):
+  - Opacity `0 -> 1`
+  - Transform `translateY(30px) -> translateY(0)`
+  - `400ms` with easeOutCubic-like curve `cubic-bezier(0.215, 0.61, 0.355, 1)`
+- Exit (`.is-leaving`):
+  - Opacity `1 -> 0`
+  - Transform `translateY(0) -> translateY(-20px)`
+  - `300ms`
 
-## Gaps / Risks
-- `assets/resume.pdf` is empty, so Resume/Download links currently open a blank file.
-- `README.md` is placeholder and does not document setup, architecture, or customization.
-- `js/heroScene.js` is not wired into `main.js` (possible dead/experimental module unless intentionally reserved).
-- External Three.js dependency is loaded from unpkg CDN (network/runtime dependency; no local fallback).
+## Performance Notes
+- Previous 3D world rendering path has been removed.
+- No Three.js render loop/geometry draw overhead in current background implementation.
+- RAF is retained only for smooth progress interpolation in the minimal immersive module.
 
-## Likely Next Tasks
-- Replace placeholder resume PDF with real document.
-- Expand `README.md` with project purpose, local run instructions, and architecture notes.
-- Decide whether to remove or integrate `heroScene.js`.
-- Populate each stage with concrete portfolio content (projects, impact, stack, contact channels).
-- Add performance QA pass for lower-end mobile devices.
+## Known Gaps / Risks
+- `README.md` remains undocumented (setup/architecture missing).
+- Resume link targets an empty PDF (`assets/resume.pdf`).
+- `js/heroScene.js` is currently unused and may create confusion unless removed or reintegrated intentionally.
+- `window.PortfolioApp.features.threeReady` is still `false` and could be renamed for clarity now that scene is non-Three.js.
+
+## Practical Next Steps
+- Decide the next background strategy per stage (subtle gradients, abstract motion layers, or section-specific visual tokens).
+- Document architecture and run instructions in `README.md`.
+- Replace placeholder resume PDF.
+- Either remove `js/heroScene.js` or explicitly mark it as archived/experimental.

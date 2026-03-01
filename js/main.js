@@ -25,6 +25,7 @@ let currentStageIndex = 0;
 let immersiveScene = null;
 let immersiveModule = null;
 let ticking = false;
+const stageLeaveTimers = new Map();
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -58,8 +59,34 @@ const setActiveNav = (stageId) => {
 };
 
 const setActiveStage = (index) => {
+  const previousIndex = currentStageIndex;
+
+  if (previousIndex !== index) {
+    const previousStage = stageElements[previousIndex];
+    if (previousStage) {
+      previousStage.classList.remove("is-active");
+      previousStage.classList.add("is-leaving");
+
+      const existingTimer = stageLeaveTimers.get(previousStage);
+      if (existingTimer) {
+        window.clearTimeout(existingTimer);
+      }
+
+      const timerId = window.setTimeout(() => {
+        previousStage.classList.remove("is-leaving");
+        stageLeaveTimers.delete(previousStage);
+      }, 320);
+      stageLeaveTimers.set(previousStage, timerId);
+    }
+  }
+
   stageElements.forEach((stage, idx) => {
-    stage.classList.toggle("is-active", idx === index);
+    if (idx === index) {
+      stage.classList.remove("is-leaving");
+      stage.classList.add("is-active");
+    } else if (idx !== previousIndex) {
+      stage.classList.remove("is-active");
+    }
   });
 
   currentStageIndex = index;
@@ -162,6 +189,11 @@ const onResize = () => {
 };
 
 const teardown = () => {
+  stageLeaveTimers.forEach((timerId) => {
+    window.clearTimeout(timerId);
+  });
+  stageLeaveTimers.clear();
+
   if (immersiveScene && typeof immersiveScene.dispose === "function") {
     immersiveScene.dispose();
   }
