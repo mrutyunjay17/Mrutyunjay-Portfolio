@@ -78,20 +78,82 @@ function useRoadCurve() {
   }, [])
 }
 
+function createAsphaltTextures() {
+  const size = 512
+  const colorCanvas = document.createElement("canvas")
+  colorCanvas.width = size
+  colorCanvas.height = size
+  const colorCtx = colorCanvas.getContext("2d")
+  const colorImage = colorCtx.createImageData(size, size)
+
+  const roughCanvas = document.createElement("canvas")
+  roughCanvas.width = size
+  roughCanvas.height = size
+  const roughCtx = roughCanvas.getContext("2d")
+  const roughImage = roughCtx.createImageData(size, size)
+
+  for (let y = 0; y < size; y += 1) {
+    const v = y / size
+    for (let x = 0; x < size; x += 1) {
+      const i = (y * size + x) * 4
+      const microNoise = (Math.random() - 0.5) * 14
+      const grain = Math.sin(v * 170 + x * 0.035) * 5
+      const longitudinal = Math.sin(v * 28) * 3.5
+
+      const base = THREE.MathUtils.clamp(18 + microNoise + grain + longitudinal, 5, 36)
+
+      colorImage.data[i] = base - 3
+      colorImage.data[i + 1] = base - 1
+      colorImage.data[i + 2] = base + 1
+      colorImage.data[i + 3] = 255
+
+      const roughness = THREE.MathUtils.clamp(
+        170 + microNoise * 2 + Math.sin(v * 120 + x * 0.02) * 35,
+        95,
+        245,
+      )
+      roughImage.data[i] = roughness
+      roughImage.data[i + 1] = roughness
+      roughImage.data[i + 2] = roughness
+      roughImage.data[i + 3] = 255
+    }
+  }
+
+  colorCtx.putImageData(colorImage, 0, 0)
+  roughCtx.putImageData(roughImage, 0, 0)
+
+  const colorTexture = new THREE.CanvasTexture(colorCanvas)
+  colorTexture.wrapS = THREE.RepeatWrapping
+  colorTexture.wrapT = THREE.RepeatWrapping
+  colorTexture.repeat.set(1.5, 14)
+  colorTexture.anisotropy = 8
+
+  const roughnessTexture = new THREE.CanvasTexture(roughCanvas)
+  roughnessTexture.wrapS = THREE.RepeatWrapping
+  roughnessTexture.wrapT = THREE.RepeatWrapping
+  roughnessTexture.repeat.set(1.5, 14)
+  roughnessTexture.anisotropy = 8
+
+  return { colorTexture, roughnessTexture }
+}
+
 /*
 ROAD MESH
 */
-function Road({ curve }) {
+function Road({ curve, endT }) {
   const roadWidth = 12
-  const segments = 200
+  const totalSegments = 200
+  const asphalt = useMemo(() => createAsphaltTextures(), [])
 
   const geometry = useMemo(() => {
     const positions = []
     const uvs = []
     const indices = []
+    const clampedEnd = Math.max(0.03, Math.min(endT, 1))
+    const segments = Math.max(8, Math.floor(totalSegments * clampedEnd))
 
     for (let i = 0; i <= segments; i += 1) {
-      const t = i / segments
+      const t = (i / segments) * clampedEnd
       const { point, normal } = getCurveFrame(curve, t)
 
       const left = point.clone().addScaledVector(normal, roadWidth / 2)
@@ -122,20 +184,22 @@ function Road({ curve }) {
     bufferGeometry.computeVertexNormals()
 
     return bufferGeometry
-  }, [curve])
+  }, [curve, endT])
 
   return (
     <mesh geometry={geometry}>
       <meshPhysicalMaterial
-        color="#181b24"
-        emissive="#06080d"
-        emissiveIntensity={0.16}
-        metalness={0.16}
-        roughness={0.66}
-        transmission={0.01}
-        clearcoat={0.34}
-        clearcoatRoughness={0.22}
-        reflectivity={0.5}
+        map={asphalt.colorTexture}
+        roughnessMap={asphalt.roughnessTexture}
+        color="#090b10"
+        emissive="#020306"
+        emissiveIntensity={0.24}
+        metalness={0.24}
+        roughness={0.88}
+        transmission={0}
+        clearcoat={0.38}
+        clearcoatRoughness={0.26}
+        reflectivity={0.42}
       />
     </mesh>
   )
@@ -149,24 +213,36 @@ function getLineVisibilityEndT(sections, activeIndex) {
   return Math.max(0, Math.min(endT, 1))
 }
 
-function LaneLines({ curve, endT }) {
-  const offsets = [-4, 0, 4]
+function AnimatedNeonLine({ curve, offset, endT, color, lineWidth, baseOpacity, phase = 0 }) {
+  const lineRef = useRef()
+  const points = useMemo(() => sampleOffsetCurveRange(curve, offset, 0, endT), [curve, offset, endT])
+
+  useFrame(({ clock }) => {
+    const material = lineRef.current?.material
+    if (!material) return
+
+    const breath = 0.5 + 0.5 * Math.sin(clock.getElapsedTime() * 1.7 + phase)
+    material.opacity = baseOpacity * (0.84 + 0.16 * breath)
+  })
 
   return (
+    <Line
+      ref={lineRef}
+      points={points}
+      color={color}
+      lineWidth={lineWidth}
+      transparent
+      opacity={baseOpacity}
+    />
+  )
+}
+
+function LaneLines({ curve, endT }) {
+  return (
     <>
-      {offsets.map((offset) => {
-        const points = sampleOffsetCurveRange(curve, offset, 0, endT)
-        return (
-          <Line
-            key={offset}
-            points={points}
-            color="#ff4268"
-            lineWidth={1.35}
-            transparent
-            opacity={0.95}
-          />
-        )
-      })}
+      <AnimatedNeonLine curve={curve} offset={-4} endT={endT} color="#ff3f6a" lineWidth={1.35} baseOpacity={0.92} phase={0} />
+      <AnimatedNeonLine curve={curve} offset={0} endT={endT} color="#ff4f74" lineWidth={1.2} baseOpacity={0.88} phase={0.8} />
+      <AnimatedNeonLine curve={curve} offset={4} endT={endT} color="#ff3f6a" lineWidth={1.35} baseOpacity={0.92} phase={1.6} />
     </>
   )
 }
@@ -203,23 +279,10 @@ function CameraRig({ curve }) {
 }
 
 function RoadRails({ curve, endT }) {
-  const offsets = [-6, 6]
-
   return (
     <>
-      {offsets.map((offset) => {
-        const points = sampleOffsetCurveRange(curve, offset, 0, endT)
-        return (
-          <Line
-            key={offset}
-            points={points}
-            color="#8efbff"
-            lineWidth={2.6}
-            transparent
-            opacity={0.98}
-          />
-        )
-      })}
+      <AnimatedNeonLine curve={curve} offset={-6} endT={endT} color="#8efbff" lineWidth={2.6} baseOpacity={0.96} phase={0.3} />
+      <AnimatedNeonLine curve={curve} offset={6} endT={endT} color="#8efbff" lineWidth={2.6} baseOpacity={0.96} phase={1.1} />
     </>
   )
 }
@@ -244,10 +307,10 @@ function SceneContent({ sections, activeIndex, expandedSectionId, onToggleExpand
 
       <directionalLight position={[10, 10, 5]} intensity={1} />
 
-      <Road curve={curve} />
+      <Road curve={curve} endT={lineVisibilityEndT} />
 
       <LaneLines curve={curve} endT={lineVisibilityEndT} />
-      <EnergyStreaks curve={curve} particles={quality.particleCount} />
+      <EnergyStreaks curve={curve} particles={quality.particleCount} endT={lineVisibilityEndT} />
 
       <RoadRails curve={curve} endT={lineVisibilityEndT} />
 

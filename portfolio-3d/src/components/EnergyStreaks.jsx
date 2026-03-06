@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { getCurveFrame } from "../scene/curveUtils"
 
-export default function EnergyStreaks({ curve, particles = 60 }) {
+export default function EnergyStreaks({ curve, particles = 60, endT = 1 }) {
   const meshRefs = useRef([])
 
   const offsets = useRef([])
@@ -26,6 +26,21 @@ export default function EnergyStreaks({ curve, particles = 60 }) {
       if (offsets.current[i] > 1) offsets.current[i] -= 1
 
       const t = offsets.current[i]
+      const material = mesh.material
+
+      if (t > endT) {
+        mesh.visible = false
+        return
+      }
+
+      mesh.visible = true
+
+      // Soft fade near the visibility boundary to avoid abrupt popping.
+      if (material) {
+        const fadeStart = Math.max(endT - 0.06, 0)
+        const alpha = THREE.MathUtils.clamp((endT - t) / Math.max(endT - fadeStart, 0.0001), 0, 1)
+        material.opacity = alpha
+      }
 
       const { point, normal } = getCurveFrame(curve, t)
 
@@ -54,7 +69,7 @@ export default function EnergyStreaks({ curve, particles = 60 }) {
           }}
         >
           <sphereGeometry args={[0.07, 8, 8]} />
-          <meshBasicMaterial color="#22d3ee" />
+          <meshBasicMaterial color="#22d3ee" transparent opacity={1} />
         </mesh>
 
       ))}
