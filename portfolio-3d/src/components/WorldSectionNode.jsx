@@ -65,9 +65,6 @@ export default function WorldSectionNode({
   position,
   isActive,
   isNeighbor,
-  canExpand,
-  isExpanded,
-  onToggleExpand,
 }) {
   const rootRef = useRef()
   const scaleRef = useRef(1)
@@ -81,6 +78,7 @@ export default function WorldSectionNode({
 
   const activeClassName = isActive ? "is-active" : "is-neighbor"
   const subSections = useMemo(() => section.subSections ?? [], [section.subSections])
+  const isSubVisible = true
 
   const computeLayout = useCallback(() => {
     const main = mainRef.current
@@ -151,7 +149,7 @@ export default function WorldSectionNode({
       observer.disconnect()
       window.removeEventListener("resize", computeLayout)
     }
-  }, [computeLayout, isExpanded, section.id])
+  }, [computeLayout, isSubVisible, section.id])
 
   useFrame(({ clock }, delta) => {
     const root = rootRef.current
@@ -170,7 +168,7 @@ export default function WorldSectionNode({
       <Html transform sprite distanceFactor={12} wrapperClass="world-hud-anchor">
         <div
           className={`world-hud-node ${activeClassName}`}
-          data-expanded={isExpanded ? "true" : "false"}
+          data-expanded={isSubVisible ? "true" : "false"}
           style={{
             transform: `translate(${layout.viewportShift.x}px, ${layout.viewportShift.y}px)`,
           }}
@@ -180,19 +178,10 @@ export default function WorldSectionNode({
             <h2 className="world-title">{section.title}</h2>
             <p className="world-subtitle">{section.subtitle}</p>
             <p className="world-body">{section.body}</p>
-            <button
-              type="button"
-              className="world-cta"
-              onClick={onToggleExpand}
-              disabled={!canExpand}
-              aria-disabled={!canExpand}
-            >
-              {section.cta.label}
-            </button>
           </div>
 
           <AnimatePresence>
-            {isExpanded &&
+            {isSubVisible &&
               subSections.slice(0, 4).map((item, index) => {
                 const corner = layout.corners[index] ?? layout.corners[0]
                 const mini = layout.mini[index] ?? layout.mini[0]

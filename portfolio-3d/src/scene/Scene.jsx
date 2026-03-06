@@ -4,8 +4,8 @@ import { useMemo, useRef } from "react"
 import * as THREE from "three"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import EnergyStreaks from "../components/EnergyStreaks"
+import RoadsideBuildings from "../components/RoadsideBuildings"
 import WorldSectionNode from "../components/WorldSectionNode"
-import useScrollProgress from "../hooks/useScrollProgress"
 import { getCurveFrame, sampleOffsetCurveRange } from "./curveUtils"
 import { QUALITY_PRESETS } from "./quality"
 
@@ -251,9 +251,7 @@ function LaneLines({ curve, endT }) {
 CAMERA FOLLOW SYSTEM
 Scroll-driven movement
 */
-function CameraRig({ curve }) {
-  const progress = useScrollProgress()
-
+function CameraRig({ curve, progress }) {
   const currentPos = useRef(new THREE.Vector3())
   const currentLook = useRef(new THREE.Vector3())
 
@@ -290,16 +288,19 @@ function RoadRails({ curve, endT }) {
 /*
 SCENE
 */
-function SceneContent({ sections, activeIndex, expandedSectionId, onToggleExpand, quality }) {
+function SceneContent({ sections, progress, activeIndex, quality }) {
   const curve = useRoadCurve()
   const lineVisibilityEndT = useMemo(
     () => getLineVisibilityEndT(sections, activeIndex),
     [sections, activeIndex],
   )
   const visibleIndices = useMemo(() => {
-    const indices = [activeIndex - 1, activeIndex, activeIndex + 1]
-    return indices.filter((index) => index >= 0 && index < sections.length)
-  }, [activeIndex, sections.length])
+    const endWithMargin = Math.min(1, lineVisibilityEndT + 0.02)
+    return sections
+      .map((section, index) => ({ section, index }))
+      .filter(({ section }) => section.checkpointT <= endWithMargin)
+      .map(({ index }) => index)
+  }, [lineVisibilityEndT, sections])
 
   return (
     <>
@@ -313,6 +314,7 @@ function SceneContent({ sections, activeIndex, expandedSectionId, onToggleExpand
       <EnergyStreaks curve={curve} particles={quality.particleCount} endT={lineVisibilityEndT} />
 
       <RoadRails curve={curve} endT={lineVisibilityEndT} />
+      <RoadsideBuildings curve={curve} sections={sections} endT={lineVisibilityEndT} />
 
       {visibleIndices.map((index) => {
         const section = sections[index]
@@ -326,23 +328,19 @@ function SceneContent({ sections, activeIndex, expandedSectionId, onToggleExpand
             position={position}
             isActive={isActive}
             isNeighbor={!isActive}
-            canExpand={isActive}
-            isExpanded={isActive && expandedSectionId === section.id}
-            onToggleExpand={() => onToggleExpand(section.id)}
           />
         )
       })}
 
-      <CameraRig curve={curve} />
+      <CameraRig curve={curve} progress={progress} />
     </>
   )
 }
 
 export default function Scene({
   sections,
+  progress,
   activeIndex,
-  expandedSectionId,
-  onToggleExpand,
   qualityLevel = "medium",
 }) {
   const quality = QUALITY_PRESETS[qualityLevel] ?? QUALITY_PRESETS.medium
@@ -353,9 +351,8 @@ export default function Scene({
       <fog attach="fog" args={["#000000", 60, 220]} />
       <SceneContent
         sections={sections}
+        progress={progress}
         activeIndex={activeIndex}
-        expandedSectionId={expandedSectionId}
-        onToggleExpand={onToggleExpand}
         quality={quality}
       />
       <EffectComposer>

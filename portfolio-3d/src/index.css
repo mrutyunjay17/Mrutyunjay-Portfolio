@@ -117,10 +117,10 @@ body {
 }
 
 .world-hud-main {
-  --subhud-gap-ratio: 0.17;
-  --subhud-min-gap: 24;
-  --subhud-max-gap: 44;
-  --subhud-safe-margin: 18;
+  --subhud-gap-ratio: 0.035;
+  --subhud-min-gap: 4;
+  --subhud-max-gap: 10;
+  --subhud-safe-margin: 8;
   --subhud-width: 164;
   --subhud-height: 96;
   text-align: center;
@@ -272,10 +272,10 @@ body {
   }
 
   .world-hud-main {
-    --subhud-gap-ratio: 0.15;
-    --subhud-min-gap: 18;
-    --subhud-max-gap: 30;
-    --subhud-safe-margin: 10;
+    --subhud-gap-ratio: 0.03;
+    --subhud-min-gap: 2;
+    --subhud-max-gap: 8;
+    --subhud-safe-margin: 6;
     --subhud-width: 132;
     --subhud-height: 88;
     padding: 14px;
