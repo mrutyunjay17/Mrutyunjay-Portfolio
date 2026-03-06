@@ -4,6 +4,8 @@ import * as THREE from "three"
 import useScrollProgress from "../hooks/useScrollProgress"
 import Checkpoint from "../components/Checkpoint"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
+import EnergyStreaks from "../components/EnergyStreaks"
+import RoadEdgeLights from "../components/RoadEdgeLights"
 
 /*
 ROAD CURVE
@@ -12,21 +14,67 @@ Creates zigzag path with vertical waves
 function useRoadCurve() {
   return useMemo(() => {
     const points = [
-      new THREE.Vector3(0, 1, 0),
 
-      new THREE.Vector3(8, 2, -20),
-      new THREE.Vector3(-8, 3, -40),
+    // start
+    new THREE.Vector3(0,0,0),
 
-      new THREE.Vector3(10, 1, -60),
-      new THREE.Vector3(-10, 4, -80),
+    // checkpoint 1
+    new THREE.Vector3(0,0,-20),
 
-      new THREE.Vector3(9, 2, -100),
-      new THREE.Vector3(-9, 3, -120),
+    // right turn
+    new THREE.Vector3(10,0,-40),
 
-      new THREE.Vector3(0, 2, -140),
-    ]
+    // straight
+    new THREE.Vector3(10,0,-60),
 
-    return new THREE.CatmullRomCurve3(points)
+    // checkpoint 2
+    new THREE.Vector3(10,0,-80),
+
+    // straight
+    new THREE.Vector3(10,0,-100),
+
+    // checkpoint 3
+    new THREE.Vector3(10,0,-120),
+
+    // upward elevation
+    new THREE.Vector3(10,6,-150),
+
+    // checkpoint 4
+    new THREE.Vector3(10,6,-170),
+
+    // downward elevation
+    new THREE.Vector3(10,0,-200),
+
+    // straight
+    new THREE.Vector3(10,0,-220),
+
+    // checkpoint 5
+    new THREE.Vector3(10,0,-240),
+
+    // left turn
+    new THREE.Vector3(-10,0,-260),
+
+    // straight
+    new THREE.Vector3(-10,0,-280),
+
+    // upward elevation
+    new THREE.Vector3(-10,5,-310),
+
+    // downward elevation
+    new THREE.Vector3(-10,0,-340),
+
+    // checkpoint 6
+    new THREE.Vector3(-10,0,-360),
+
+    // straight
+    new THREE.Vector3(-10,0,-380),
+
+    // checkpoint 7
+    new THREE.Vector3(-10,0,-400)
+
+  ]
+
+  return new THREE.CatmullRomCurve3(points, false, "catmullrom", 0.5)
   }, [])
 }
 
@@ -40,7 +88,7 @@ function createGradientTexture() {
   const gradient = ctx.createLinearGradient(0, 0, 512, 0)
 
   gradient.addColorStop(0, "#22d3ee")  // cyan
-  gradient.addColorStop(0.5, "#7c3aed") // purple
+  gradient.addColorStop(0.5, "#6d28d9") // purple
   gradient.addColorStop(1, "#ec4899")  // pink
 
   ctx.fillStyle = gradient
@@ -65,7 +113,7 @@ function createRoadGradient() {
   const gradient = ctx.createLinearGradient(0, 0, 1024, 0)
 
   gradient.addColorStop(0, "#22d3ee") // cyan
-  gradient.addColorStop(0.5, "#7c3aed") // purple
+  gradient.addColorStop(0.5, "#6d28d9") // purple
   gradient.addColorStop(1, "#ec4899") // pink
 
   ctx.fillStyle = gradient
@@ -148,8 +196,70 @@ function Road({ curve }) {
 
   }, [curve])
 
+  const roadMaterial = useMemo(() => {
+
+    return new THREE.ShaderMaterial({
+
+        transparent: true,
+
+        uniforms: {
+            color: { value: new THREE.Color("#6d28d9") },
+            fogColor: { value: new THREE.Color("#000000") },
+            fogNear: { value: 60 },
+            fogFar: { value: 220 }
+            },
+
+        vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vView;
+
+        void main() {
+
+            vNormal = normalize(normalMatrix * normal);
+
+            vec4 worldPosition = modelViewMatrix * vec4(position,1.0);
+            vView = normalize(-worldPosition.xyz);
+
+            gl_Position = projectionMatrix * worldPosition;
+
+        }
+        `,
+
+        fragmentShader: `
+
+            uniform vec3 color;
+            uniform vec3 fogColor;
+            uniform float fogNear;
+            uniform float fogFar;
+
+            varying vec3 vNormal;
+            varying vec3 vView;
+
+            void main() {
+
+            float fresnel = pow(1.0 - dot(vNormal, vView), 3.0);
+
+            vec3 finalColor = color * (0.4 + fresnel * 2.5);
+            float gradient = clamp(vView.y * 0.5 + 0.5, 0.0, 1.0);
+finalColor *= mix(0.7, 1.2, gradient);
+
+            float alpha = 0.35 + fresnel * 0.6;
+
+            vec4 baseColor = vec4(finalColor, alpha);
+
+            float depth = gl_FragCoord.z / gl_FragCoord.w;
+            float fogFactor = smoothstep(fogNear, fogFar, depth);
+
+            gl_FragColor = mix(baseColor, vec4(fogColor, alpha), fogFactor);
+
+            }
+            `
+    })
+
+    }, [])
+
   return (
-    <mesh geometry={geometry}>
+    <mesh geometry={geometry} material={roadMaterial}>
       <meshPhysicalMaterial
         color="#4c1d95"
         metalness={0}
@@ -194,6 +304,7 @@ function LaneLines({ curve }) {
 
         const geometry = new THREE.BufferGeometry().setFromPoints(points)
 
+        
         return (
           <line key={i} geometry={geometry}>
             <lineBasicMaterial
@@ -212,24 +323,37 @@ CAMERA FOLLOW SYSTEM
 Temporary auto movement to preview path
 */
 function CameraRig({ curve }) {
+
   const progress = useScrollProgress()
 
-  useFrame(({ camera }) => {
+  const currentPos = useRef(new THREE.Vector3())
+  const currentLook = useRef(new THREE.Vector3())
+
+  useFrame((state, delta) => {
+
+    const camera = state.camera
+
     const point = curve.getPointAt(progress)
-    const ahead = curve.getPointAt(
-      Math.min(progress + 0.02, 1)
+    const tangent = curve.getTangentAt(progress)
+
+    const lookAhead = curve.getPointAt(
+      Math.min(progress + 0.04, 1)
     )
 
-    const camX = point.x
-    const camY = point.y + 6
-    const camZ = point.z + 20
+    const targetPos = point.clone()
+      .addScaledVector(tangent, -8)
 
-    camera.position.lerp(
-      new THREE.Vector3(camX, camY, camZ),
-      0.08
-    )
+    targetPos.y += 4
 
-    camera.lookAt(ahead)
+    // smooth camera position
+    currentPos.current.lerp(targetPos, 1 - Math.exp(-4 * delta))
+
+    // smooth look direction
+    currentLook.current.lerp(lookAhead, 1 - Math.exp(-6 * delta))
+
+    camera.position.copy(currentPos.current)
+    camera.lookAt(currentLook.current)
+
   })
 
   return null
@@ -281,14 +405,14 @@ SCENE
 function SceneContent() {
   const curve = useRoadCurve()
   const checkpoints = [
-    0.05,
-    0.2,
-    0.35,
-    0.5,
-    0.65,
-    0.8,
-    0.95,
-    ]
+  0.05,
+  0.18,
+  0.32,
+  0.45,
+  0.60,
+  0.80,
+  0.95
+]
 
   return (
     <>
@@ -302,8 +426,10 @@ function SceneContent() {
       <Road curve={curve} />
 
       <LaneLines curve={curve} />
+      <EnergyStreaks curve={curve} />
 
       <RoadRails curve={curve} />
+      
 
       {
         checkpoints.map((t, i) => {
@@ -327,6 +453,8 @@ function SceneContent() {
 export default function Scene() {
   return (
     <Canvas camera={{ position: [0, 8, 25], fov: 60 }}>
+      <color attach="background" args={["#000000"]} />
+      <fog attach="fog" args={["#000000", 60, 220]} />
       <SceneContent />
       <EffectComposer>
         <Bloom
