@@ -6,18 +6,18 @@ export default function useScrollProgress() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
-      const docHeight =
-        document.body.scrollHeight - window.innerHeight
 
-      const scrollProgress = scrollTop / docHeight
-      setProgress(scrollProgress)
+      // 7 sections = 700vh
+      const maxScroll = window.innerHeight * 6
+
+      const value = Math.min(scrollTop / maxScroll, 1)
+
+      setProgress(value)
     }
 
     window.addEventListener("scroll", handleScroll)
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   return progress
