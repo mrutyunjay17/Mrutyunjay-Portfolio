@@ -1,54 +1,10 @@
 import { useMemo } from "react"
-import * as THREE from "three"
 import { Line } from "@react-three/drei"
+import { sampleOffsetCurve } from "../scene/curveUtils"
 
 export default function RoadEdgeLights({ curve }) {
-
-  const leftPoints = useMemo(() => {
-    const pts = []
-    const up = new THREE.Vector3(0,1,0)
-
-    for (let i = 0; i <= 200; i++) {
-
-      const t = i / 200
-      const point = curve.getPointAt(t)
-      const tangent = curve.getTangentAt(t)
-
-      const normal = new THREE.Vector3()
-        .crossVectors(up, tangent)
-        .normalize()
-
-      const offset = normal.clone().multiplyScalar(-5)
-
-      pts.push(point.clone().add(offset))
-
-    }
-
-    return pts
-  }, [curve])
-
-  const rightPoints = useMemo(() => {
-    const pts = []
-    const up = new THREE.Vector3(0,1,0)
-
-    for (let i = 0; i <= 200; i++) {
-
-      const t = i / 200
-      const point = curve.getPointAt(t)
-      const tangent = curve.getTangentAt(t)
-
-      const normal = new THREE.Vector3()
-        .crossVectors(up, tangent)
-        .normalize()
-
-      const offset = normal.clone().multiplyScalar(5)
-
-      pts.push(point.clone().add(offset))
-
-    }
-
-    return pts
-  }, [curve])
+  const leftPoints = useMemo(() => sampleOffsetCurve(curve, -5), [curve])
+  const rightPoints = useMemo(() => sampleOffsetCurve(curve, 5), [curve])
 
   return (
     <>

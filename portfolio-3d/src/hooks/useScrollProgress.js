@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react"
+import { getScrollProgress } from "../utils/scroll"
 
 export default function useScrollProgress() {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY
-
-      // 7 sections = 700vh
-      const maxScroll = window.innerHeight * 6
-
-      const value = Math.min(scrollTop / maxScroll, 1)
-
-      setProgress(value)
+      setProgress(getScrollProgress())
     }
 
     window.addEventListener("scroll", handleScroll)
+    window.addEventListener("resize", handleScroll)
+    handleScroll()
 
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
+    }
   }, [])
 
   return progress
