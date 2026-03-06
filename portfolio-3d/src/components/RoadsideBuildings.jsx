@@ -77,6 +77,7 @@ function generateBuildingsForSide(curve, sections, side, seed) {
         bannerSide: rng() > 0.5 ? 1 : -1,
         bannerRow: rng(),
         bannerTone: rng() > 0.5 ? "red" : "yellow",
+        borderTone: rng() < 0.33 ? "red" : rng() < 0.66 ? "yellow" : "cyan",
       })
     }
 
@@ -99,6 +100,15 @@ function bannerColorFor(tone, intensity) {
   }
   const color = (palette[tone] ?? palette.red).clone()
   return color.multiplyScalar(intensity)
+}
+
+function borderColorFor(tone) {
+  const palette = {
+    red: new THREE.Color("#ff3b63"),
+    yellow: new THREE.Color("#ffe25b"),
+    cyan: new THREE.Color("#7fffff"),
+  }
+  return (palette[tone] ?? palette.cyan).clone()
 }
 
 function generateWindowInstances(buildings) {
@@ -210,17 +220,37 @@ export default function RoadsideBuildings({ curve, sections, endT }) {
     [],
   )
 
+  const borderGeometry = useMemo(() => {
+    const base = new THREE.BoxGeometry(1, 1, 1)
+    return new THREE.EdgesGeometry(base)
+  }, [])
+
   return (
     <group>
       {visibleBuildings.map((building, idx) => (
-      <mesh
+        <group
           key={`${building.t}-${idx}`}
           position={building.center}
           rotation={[0, building.yaw, 0]}
-          material={buildingMaterial}
         >
-          <boxGeometry args={[building.width, building.height, building.depth]} />
-        </mesh>
+          <mesh material={buildingMaterial}>
+            <boxGeometry args={[building.width, building.height, building.depth]} />
+          </mesh>
+
+          {!building.hasBanner && (
+            <lineSegments
+              geometry={borderGeometry}
+              scale={[building.width * 1.01, building.height * 1.01, building.depth * 1.01]}
+            >
+              <lineBasicMaterial
+                color={borderColorFor(building.borderTone)}
+                toneMapped={false}
+                transparent
+                opacity={0.92}
+              />
+            </lineSegments>
+          )}
+        </group>
       ))}
 
       {windowInstances.length > 0 && (
