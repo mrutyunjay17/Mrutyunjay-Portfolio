@@ -6,6 +6,7 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import EnergyStreaks from "../components/EnergyStreaks"
 import RoadsideBuildings from "../components/RoadsideBuildings"
 import WorldSectionNode from "../components/WorldSectionNode"
+import IntroWindow from "../components/IntroWindow"
 import { getCurveFrame, sampleOffsetCurveRange } from "./curveUtils"
 import { QUALITY_PRESETS } from "./quality"
 
@@ -340,6 +341,8 @@ function SceneContent({ sections, progress, activeIndex, quality }) {
 
       <RoadRails curve={curve} endT={lineVisibilityEndT} />
       <RoadsideBuildings curve={curve} sections={sections} endT={lineVisibilityEndT} />
+
+      <IntroWindow position={new THREE.Vector3(0, 2.5, 1)} />
 
       {visibleIndices.map((index) => {
         const section = sections[index]

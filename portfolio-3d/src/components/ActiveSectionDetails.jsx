@@ -15,9 +15,9 @@ export default function ActiveSectionDetails({ sections, activeIndex }) {
           <Motion.article
             key={`${activeSection.id}-${item.id}`}
             className="fixed-subhud-card"
-            initial={{ opacity: 0, x: 40, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 20, scale: 0.95 }}
+            initial={{ x: 40, scale: 0.95 }}
+            animate={{ x: 0, scale: 1 }}
+            exit={{ x: 20, scale: 0.95 }}
             transition={{ duration: 0.4, delay: index * 0.1, ease: [0.2, 0.9, 0.3, 1] }}
           >
             <div className="subhud-scanline"></div>

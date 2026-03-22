@@ -21,7 +21,7 @@ export default function WorldSectionNode({
     const floatY = position.y + 2 + Math.sin(clock.getElapsedTime() * 1.2) * 0.4
     root.position.set(position.x, floatY, position.z)
 
-    const targetScale = isActive ? 1 : isNeighbor ? 0.8 : 0.72
+    const targetScale = isActive ? 1 : 0.95
     scaleRef.current = THREE.MathUtils.lerp(scaleRef.current, targetScale, 1 - Math.exp(-5 * delta))
     root.scale.setScalar(scaleRef.current)
   })
