@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Line } from "@react-three/drei"
+import { Line, Environment, Grid } from "@react-three/drei"
 import { useMemo, useRef } from "react"
 import * as THREE from "three"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
@@ -108,9 +108,9 @@ function createAsphaltTextures() {
       colorImage.data[i + 3] = 255
 
       const roughness = THREE.MathUtils.clamp(
-        170 + microNoise * 2 + Math.sin(v * 120 + x * 0.02) * 35,
-        95,
-        245,
+        40 + microNoise * 2 + Math.sin(v * 120 + x * 0.02) * 30,
+        15,
+        100,
       )
       roughImage.data[i] = roughness
       roughImage.data[i + 1] = roughness
@@ -191,15 +191,15 @@ function Road({ curve, endT }) {
       <meshPhysicalMaterial
         map={asphalt.colorTexture}
         roughnessMap={asphalt.roughnessTexture}
-        color="#090b10"
-        emissive="#020306"
-        emissiveIntensity={0.24}
-        metalness={0.24}
-        roughness={0.88}
+        color="#04060b"
+        emissive="#010204"
+        emissiveIntensity={0.2}
+        metalness={0.92}
+        roughness={0.15}
         transmission={0}
-        clearcoat={0.38}
-        clearcoatRoughness={0.26}
-        reflectivity={0.42}
+        clearcoat={1.0}
+        clearcoatRoughness={0.12}
+        reflectivity={1.0}
       />
     </mesh>
   )
@@ -254,6 +254,7 @@ Scroll-driven movement
 function CameraRig({ curve, progress }) {
   const currentPos = useRef(new THREE.Vector3())
   const currentLook = useRef(new THREE.Vector3())
+  const rigRef = useRef()
 
   useFrame((state, delta) => {
     const camera = state.camera
@@ -271,9 +272,18 @@ function CameraRig({ curve, progress }) {
 
     camera.position.copy(currentPos.current)
     camera.lookAt(currentLook.current)
+
+    if (rigRef.current) {
+      rigRef.current.position.copy(currentPos.current)
+    }
   })
 
-  return null
+  return (
+    <group ref={rigRef}>
+      <pointLight color="#ff3f6a" intensity={25} distance={60} position={[0, 2, -15]} />
+      <pointLight color="#22d3ee" intensity={20} distance={50} position={[0, 6, 5]} />
+    </group>
+  )
 }
 
 function RoadRails({ curve, endT }) {
@@ -304,11 +314,26 @@ function SceneContent({ sections, progress, activeIndex, quality }) {
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-
-      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <ambientLight intensity={0.4} color="#0a0a2a" />
+      <directionalLight position={[10, 15, -5]} intensity={1.5} color="#22d3ee" />
+      <directionalLight position={[-10, 5, 10]} intensity={1} color="#ff3f6a" />
+      <Environment preset="night" />
 
       <Road curve={curve} endT={lineVisibilityEndT} />
+
+      <Grid
+        position={[0, -4, 0]}
+        args={[400, 400]}
+        cellSize={15}
+        cellThickness={1.2}
+        cellColor="#0c1731"
+        sectionSize={75}
+        sectionThickness={1.5}
+        sectionColor="#22d3ee"
+        fadeDistance={250}
+        fadeStrength={1}
+        infiniteGrid
+      />
 
       <LaneLines curve={curve} endT={lineVisibilityEndT} />
       <EnergyStreaks curve={curve} particles={quality.particleCount} endT={lineVisibilityEndT} />
@@ -347,8 +372,8 @@ export default function Scene({
 
   return (
     <Canvas camera={{ position: [0, 8, 25], fov: 60 }}>
-      <color attach="background" args={["#000000"]} />
-      <fog attach="fog" args={["#000000", 60, 220]} />
+      <color attach="background" args={["#05081c"]} />
+      <fog attach="fog" args={["#05081c", 50, 240]} />
       <SceneContent
         sections={sections}
         progress={progress}

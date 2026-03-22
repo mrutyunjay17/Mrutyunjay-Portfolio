@@ -1,28 +1,3 @@
-function createSubSections(sectionId) {
-  return [
-    {
-      id: `${sectionId}-sub-1`,
-      heading: "Insight 01",
-      description: "Placeholder content for this corner panel. Replace with section-specific details.",
-    },
-    {
-      id: `${sectionId}-sub-2`,
-      heading: "Insight 02",
-      description: "Placeholder content for this corner panel. Replace with section-specific details.",
-    },
-    {
-      id: `${sectionId}-sub-3`,
-      heading: "Insight 03",
-      description: "Placeholder content for this corner panel. Replace with section-specific details.",
-    },
-    {
-      id: `${sectionId}-sub-4`,
-      heading: "Insight 04",
-      description: "Placeholder content for this corner panel. Replace with section-specific details.",
-    },
-  ]
-}
-
 export const sections = [
   {
     id: "about",
@@ -31,7 +6,11 @@ export const sections = [
     body: "I design and ship immersive web experiences that balance visual ambition with product clarity and performance.",
     cta: { label: "Read Story", href: "#about" },
     checkpointT: 0.05,
-    subSections: createSubSections("about"),
+    subSections: [
+      { id: "about-sub-1", heading: "Focus", description: "Merging high-performance rendering with accessible modern web standards." },
+      { id: "about-sub-2", heading: "Location", description: "Operating globally, building digital worlds and systems." },
+      { id: "about-sub-3", heading: "Philosophy", description: "Design is how it works, code is how it scales." }
+    ],
   },
   {
     id: "experience",
@@ -40,7 +19,11 @@ export const sections = [
     body: "From frontend architecture to polished interaction design, I have delivered production-grade interfaces across fast-moving teams.",
     cta: { label: "View Timeline", href: "#experience" },
     checkpointT: 0.18,
-    subSections: createSubSections("experience"),
+    subSections: [
+      { id: "exp-sub-1", heading: "Senior Engineer", description: "Lead frontend architecture for high-traffic enterprise applications." },
+      { id: "exp-sub-2", heading: "Creative Developer", description: "Spearheaded 3D web experiences and generative WebGL campaigns." },
+      { id: "exp-sub-3", heading: "Open Source", description: "Maintainer of several packages focused on animation and 3D web." }
+    ],
   },
   {
     id: "projects",
@@ -49,7 +32,11 @@ export const sections = [
     body: "A curated set of work across UI engineering, 3D interaction, and performance-focused implementation details.",
     cta: { label: "Open Projects", href: "#projects" },
     checkpointT: 0.32,
-    subSections: createSubSections("projects"),
+    subSections: [
+      { id: "proj-sub-1", heading: "Cyber Deck", description: "A 3D dashboard with real-time data visualizers. Built with Three.js." },
+      { id: "proj-sub-2", heading: "Nexus API", description: "Scalable backend service handling thousands of auth events per second." },
+      { id: "proj-sub-3", heading: "Aura UI", description: "A highly-acclaimed accessible component library for React." }
+    ],
   },
   {
     id: "skills",
@@ -58,7 +45,11 @@ export const sections = [
     body: "JavaScript, React, Three.js, motion systems, and pragmatic architecture choices that scale from prototype to production.",
     cta: { label: "See Stack", href: "#skills" },
     checkpointT: 0.45,
-    subSections: createSubSections("skills"),
+    subSections: [
+      { id: "skill-sub-1", heading: "Core", description: "TypeScript, React, Next.js, Node.js, GraphQL, PostgreSQL." },
+      { id: "skill-sub-2", heading: "Visual", description: "Three.js, React Three Fiber, WebGL, Framer Motion, GSAP." },
+      { id: "skill-sub-3", heading: "DevOps", description: "Docker, Vercel, AWS, CI/CD pipelines, Jest, Cypress." }
+    ],
   },
   {
     id: "architecture",
@@ -67,7 +58,11 @@ export const sections = [
     body: "A modular render pipeline with scroll-driven camera control, reusable spline sampling utilities, and UI state synchronization.",
     cta: { label: "Explore System", href: "#architecture" },
     checkpointT: 0.6,
-    subSections: createSubSections("architecture"),
+    subSections: [
+      { id: "arch-sub-1", heading: "Rendering", description: "React Three Fiber with Bloom post-processing." },
+      { id: "arch-sub-2", heading: "Camera Rig", description: "CatmullRom spline based scroll-driven camera interpolation." },
+      { id: "arch-sub-3", heading: "UI Layer", description: "Fixed HTML overlays synced to 3D space with framer-motion." }
+    ],
   },
   {
     id: "achievements",
@@ -76,7 +71,11 @@ export const sections = [
     body: "Highlights from shipped outcomes: performance wins, UX improvements, and product features that moved business metrics.",
     cta: { label: "View Results", href: "#achievements" },
     checkpointT: 0.8,
-    subSections: createSubSections("achievements"),
+    subSections: [
+      { id: "ach-sub-1", heading: "Awwwards", description: "Site of the Day for multiple client projects." },
+      { id: "ach-sub-2", heading: "Performance", description: "Reduced bundle size by 40% increasing conversion rate by 15%." },
+      { id: "ach-sub-3", heading: "Community", description: "Over 5K stars across GitHub open-source repositories." }
+    ],
   },
   {
     id: "contact",
@@ -85,6 +84,10 @@ export const sections = [
     body: "Open to collaboration, consulting, and full-time opportunities where craft, product thinking, and engineering rigor matter.",
     cta: { label: "Start Conversation", href: "#contact" },
     checkpointT: 0.95,
-    subSections: createSubSections("contact"),
+    subSections: [
+      { id: "contact-sub-1", heading: "Email", description: "hello@cyberpunk-dev.io" },
+      { id: "contact-sub-2", heading: "Git", description: "github.com/mrutyunjay" },
+      { id: "contact-sub-3", heading: "Social", description: "twitter.com/mrutyunjay" }
+    ],
   },
 ]

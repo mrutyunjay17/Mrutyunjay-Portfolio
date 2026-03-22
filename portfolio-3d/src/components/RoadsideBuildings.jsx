@@ -40,13 +40,13 @@ function generateBuildingsForSide(curve, sections, side, seed) {
   let t = 0.02
 
   while (t < 0.98) {
-    t += randomRange(rng, 0.015, 0.05)
+    t += randomRange(rng, 0.015, 0.04)
     if (t >= 0.98) break
 
     const runRoll = rng()
-    const clusterSize = runRoll > 0.72 ? 3 : runRoll > 0.35 ? 2 : 1
-    const connectedStep = randomRange(rng, 0.006, 0.012)
-    const lateralOffset = randomRange(rng, 15.5, 22.5)
+    const clusterSize = runRoll > 0.72 ? 4 : runRoll > 0.35 ? 2 : 1
+    const connectedStep = randomRange(rng, 0.005, 0.01)
+    const lateralOffset = randomRange(rng, 14.5, 23.5)
 
     for (let i = 0; i < clusterSize; i += 1) {
       const bt = t + i * connectedStep
@@ -54,15 +54,30 @@ function generateBuildingsForSide(curve, sections, side, seed) {
 
       const { point, tangent, normal } = getCurveFrame(curve, bt)
       const wave = getWaveProfile(bt, sections)
-      const height = randomRange(rng, 7, 14) + wave * randomRange(rng, 8, 28)
-      const width = randomRange(rng, 2.4, 4.8)
-      const depth = randomRange(rng, 2.2, 4.4)
+      
+      const visibleHeight = randomRange(rng, 7, 14) + wave * randomRange(rng, 8, 30)
+      const topY = point.y + visibleHeight
+      const bottomY = -4
+      const height = topY - bottomY
+
+      const width = randomRange(rng, 2.4, 5.2)
+      const depth = randomRange(rng, 2.2, 4.8)
       const yaw = Math.atan2(tangent.x, tangent.z)
 
       const center = point
         .clone()
         .addScaledVector(normal, side * lateralOffset)
-        .add(new THREE.Vector3(0, height / 2 - 0.1, 0))
+      
+      center.y = bottomY + height / 2
+
+      const hasAntenna = rng() > 0.5
+      const compoundTop = rng() > 0.35 ? {
+        width: width * randomRange(rng, 0.4, 0.8),
+        height: randomRange(rng, 2, 7),
+        depth: depth * randomRange(rng, 0.4, 0.8),
+        hasAntenna,
+        antennaHeight: hasAntenna ? randomRange(rng, 3, 10) : 0
+      } : null
 
       buildings.push({
         t: bt,
@@ -71,6 +86,7 @@ function generateBuildingsForSide(curve, sections, side, seed) {
         width,
         height,
         depth,
+        compoundTop,
         litChance: 1,
         colorShift: randomRange(rng, 0.88, 1.2),
         hasBanner: rng() < 0.65,
@@ -81,7 +97,6 @@ function generateBuildingsForSide(curve, sections, side, seed) {
       })
     }
 
-    // Natural spacing after each cluster.
     t += randomRange(rng, 0.01, 0.035)
   }
 
@@ -202,9 +217,9 @@ export default function RoadsideBuildings({ curve, sections, endT }) {
   const buildingMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#0c1018",
-        roughness: 0.88,
-        metalness: 0.08,
+        color: "#04050a",
+        roughness: 0.22,
+        metalness: 0.88,
       }),
     [],
   )
@@ -225,6 +240,11 @@ export default function RoadsideBuildings({ curve, sections, endT }) {
     return new THREE.EdgesGeometry(base)
   }, [])
 
+  const antennaGeometry = useMemo(() => {
+    const base = new THREE.BoxGeometry(0.08, 1, 0.08)
+    return new THREE.EdgesGeometry(base)
+  }, [])
+
   return (
     <group>
       {visibleBuildings.map((building, idx) => (
@@ -236,6 +256,22 @@ export default function RoadsideBuildings({ curve, sections, endT }) {
           <mesh material={buildingMaterial}>
             <boxGeometry args={[building.width, building.height, building.depth]} />
           </mesh>
+
+          {building.compoundTop && (
+            <mesh material={buildingMaterial} position={[0, building.height / 2 + building.compoundTop.height / 2, 0]}>
+              <boxGeometry args={[building.compoundTop.width, building.compoundTop.height, building.compoundTop.depth]} />
+            </mesh>
+          )}
+
+          {building.compoundTop?.hasAntenna && (
+            <lineSegments
+              geometry={antennaGeometry}
+              position={[0, building.height / 2 + building.compoundTop.height + building.compoundTop.antennaHeight / 2, 0]}
+              scale={[1, building.compoundTop.antennaHeight, 1]}
+            >
+              <lineBasicMaterial color={borderColorFor(building.borderTone)} toneMapped={false} />
+            </lineSegments>
+          )}
 
           {!building.hasBanner && (
             <lineSegments
@@ -280,9 +316,9 @@ export default function RoadsideBuildings({ curve, sections, endT }) {
             <meshStandardMaterial
               color={banner.color}
               emissive={banner.color}
-              emissiveIntensity={2.1}
-              roughness={0.14}
-              metalness={0.26}
+              emissiveIntensity={3.5}
+              roughness={0.1}
+              metalness={0.5}
               toneMapped={false}
             />
           </mesh>

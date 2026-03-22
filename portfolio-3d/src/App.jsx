@@ -1,5 +1,6 @@
 import Scene from "./scene/Scene"
 import SectionHUD from "./components/SectionHUD"
+import ActiveSectionDetails from "./components/ActiveSectionDetails"
 import { sections } from "./data/sections"
 import useActiveSection from "./hooks/useActiveSection"
 
@@ -20,6 +21,7 @@ export default function App() {
           progress={progress}
           activeIndex={activeIndex}
         />
+        <ActiveSectionDetails sections={sections} activeIndex={activeIndex} />
       </div>
     </div>
   )
