@@ -28,6 +28,7 @@ export default function IntroWindow({ position }) {
               <span className="dot max"></span>
             </div>
             <div className="mac-url-bar">
+               <span className="lock-icon">🔒</span>
                <span className="url-text">https://mypage.com</span>
             </div>
           </div>
@@ -42,6 +43,13 @@ export default function IntroWindow({ position }) {
               </div>
               <span className="scroll-text">SCROLL TO ENTER</span>
             </div>
+          </div>
+          <div className="mobile-bottom-bar">
+            <span className="icon">〈</span>
+            <span className="icon">〉</span>
+            <span className="icon">⍐</span>
+            <span className="icon">⧉</span>
+            <span className="icon">◰</span>
           </div>
         </div>
       </Html>
